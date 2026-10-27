@@ -1,0 +1,12 @@
+Diagnósticos observados durante la elaboración remota. No describen el estado de la laptop.
+
+1. python --version -> Python 3.12.14.
+2. command -v sqlcmd -> no se encontró cliente.
+3. pyodbc.drivers(), usando pyodbc 5.2.0 instalado temporalmente -> [].
+4. docker --host=unix:///var/run/docker.sock info --format '{{.ServerVersion}}' -> 28.4.0 (tras acceso del ejecutor al socket).
+5. docker pull mcr.microsoft.com/mssql/server:2022-latest -> intentó descargar tres capas; resultado real final: "error pulling image configuration: download failed after attempts=6: Forbidden".
+6. Consulta del índice oficial de paquetes packages.microsoft.com -> respondió y mostró metadatos de un paquete SQL Server. Eso no significa que el motor esté instalado.
+7. Descarga del paquete oficial mssql-server_16.0.4205.1-1_amd64.deb -> redirección rechazada: "URLError <urlopen error Tunnel connection failed: 403 Forbidden>". No se inició motor.
+8. Se verificaron cinco páginas técnicas mediante el repositorio oficial MicrosoftDocs/sql-docs: HTTP 200, títulos guardados en reference_checks.json.
+
+Los errores 403/Forbidden proceden de la política de red del entorno; no son rechazos de credenciales de la laptop ni pruebas fallidas del proyecto T-SQL. Las pruebas SQL no se ejecutaron.

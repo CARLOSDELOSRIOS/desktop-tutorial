@@ -1,0 +1,96 @@
+{
+  "parser": "sqlglot 27.20.0",
+  "scope": "18 SELECT; revisi\u00f3n sint\u00e1ctica parcial, NO ejecuci\u00f3n ni validaci\u00f3n completa de T-SQL",
+  "results": [
+    {
+      "file": "Q01.sql",
+      "status": "parsed",
+      "statements": 1
+    },
+    {
+      "file": "Q12.sql",
+      "status": "parsed",
+      "statements": 1
+    },
+    {
+      "file": "Q17.sql",
+      "status": "parsed",
+      "statements": 1
+    },
+    {
+      "file": "Q05.sql",
+      "status": "parsed",
+      "statements": 1
+    },
+    {
+      "file": "Q08.sql",
+      "status": "parsed",
+      "statements": 1
+    },
+    {
+      "file": "Q03.sql",
+      "status": "parsed",
+      "statements": 1
+    },
+    {
+      "file": "Q13.sql",
+      "status": "parsed",
+      "statements": 1
+    },
+    {
+      "file": "Q09.sql",
+      "status": "parsed",
+      "statements": 1
+    },
+    {
+      "file": "Q04.sql",
+      "status": "parsed",
+      "statements": 1
+    },
+    {
+      "file": "Q18.sql",
+      "status": "parsed",
+      "statements": 1
+    },
+    {
+      "file": "Q14.sql",
+      "status": "parsed",
+      "statements": 1
+    },
+    {
+      "file": "Q06.sql",
+      "status": "parsed",
+      "statements": 1
+    },
+    {
+      "file": "Q11.sql",
+      "status": "parsed",
+      "statements": 1
+    },
+    {
+      "file": "Q16.sql",
+      "status": "parsed",
+      "statements": 1
+    },
+    {
+      "file": "Q15.sql",
+      "status": "parsed",
+      "statements": 1
+    },
+    {
+      "file": "Q10.sql",
+      "status": "parsed",
+      "statements": 1
+    },
+    {
+      "file": "Q02.sql",
+      "status": "parsed",
+      "statements": 1
+    },
+    {
+      "file": "Q07.sql",
+      "status": "parsed",
+      "statements": 1
+    }
+  ]
+}

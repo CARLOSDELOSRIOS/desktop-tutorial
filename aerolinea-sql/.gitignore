@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.py[cod]
+work/
+reports/local/
+reports/azure/
+evidence/*_local.json
+evidence/*_azure.json
+evidence/integration_*.json
+*.bak
+*.mdf
+*.ldf

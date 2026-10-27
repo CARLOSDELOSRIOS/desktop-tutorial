@@ -1,0 +1,8 @@
+{
+  "seed": 6112026,
+  "weeks": 4,
+  "planned_flights": 32,
+  "planned_tickets": 896,
+  "plan_sha256": "d8e0407486560c1ebc6acffd71c668f9a29a5e9b575ad143bcb96e59851234b8",
+  "status": "Generaci\u00f3n de insumos ejecutada; carga SQL pendiente hasta conexi\u00f3n real"
+}

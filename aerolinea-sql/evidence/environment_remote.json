@@ -1,0 +1,11 @@
+{
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "pyodbc_version": "5.2.0",
+  "odbc_drivers": [],
+  "sql_server": "no accesible",
+  "image_download": "fall\u00f3: Forbidden al descargar capas de mcr.microsoft.com",
+  "official_package_download": "fall\u00f3: redirect rechazado por pol\u00edtica HTTP 403",
+  "laptop": "sin acceso; versi\u00f3n, edici\u00f3n, SSMS y permisos pendientes",
+  "azure": "sin recursos ni credenciales; no desplegado"
+}

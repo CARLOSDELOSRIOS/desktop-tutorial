@@ -1,0 +1,1028 @@
+[
+  {
+    "name": "Airport",
+    "description": "Aeropuerto de origen o destino; código de tres letras de referencia.",
+    "columns": [
+      {
+        "name": "AirportCode",
+        "type": "char(3)",
+        "nullable": false,
+        "default": "",
+        "domain": "tres letras; referencia sintética del aeropuerto",
+        "definition": "Código IATA"
+      },
+      {
+        "name": "Name",
+        "type": "nvarchar(100)",
+        "nullable": false,
+        "default": "",
+        "domain": "texto no vacío",
+        "definition": "Nombre del aeropuerto"
+      },
+      {
+        "name": "City",
+        "type": "nvarchar(80)",
+        "nullable": false,
+        "default": "",
+        "domain": "texto",
+        "definition": "Ciudad"
+      },
+      {
+        "name": "WindowsTZ",
+        "type": "sysname",
+        "nullable": false,
+        "default": "",
+        "domain": "zona reconocida por sys.time_zone_info",
+        "definition": "Zona horaria Windows usada por AT TIME ZONE"
+      },
+      {
+        "name": "IanaTZ",
+        "type": "varchar(50)",
+        "nullable": false,
+        "default": "",
+        "domain": "zona IANA reconocida por zoneinfo",
+        "definition": "Zona equivalente usada por Python"
+      }
+    ],
+    "constraints": [
+      "CONSTRAINT PK_Airport PRIMARY KEY (AirportCode)",
+      "CONSTRAINT CK_Airport_Name CHECK (LEN(LTRIM(RTRIM(Name)))>0)"
+    ]
+  },
+  {
+    "name": "Cabin",
+    "description": "Catálogo de cabinas.",
+    "columns": [
+      {
+        "name": "CabinCode",
+        "type": "varchar(3)",
+        "nullable": false,
+        "default": "",
+        "domain": "VIP o ECO",
+        "definition": "Código de cabina"
+      },
+      {
+        "name": "Name",
+        "type": "nvarchar(30)",
+        "nullable": false,
+        "default": "",
+        "domain": "nombre",
+        "definition": "Denominación"
+      }
+    ],
+    "constraints": [
+      "CONSTRAINT PK_Cabin PRIMARY KEY (CabinCode)",
+      "CONSTRAINT CK_Cabin_Code CHECK (CabinCode IN ('VIP','ECO'))"
+    ]
+  },
+  {
+    "name": "Person",
+    "description": "Persona física; comprador y pasajero son roles, sin exigir inscripción.",
+    "columns": [
+      {
+        "name": "PersonId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "entero positivo asignado por carga",
+        "definition": "Identificador interno"
+      },
+      {
+        "name": "FullName",
+        "type": "nvarchar(120)",
+        "nullable": false,
+        "default": "",
+        "domain": "texto no vacío",
+        "definition": "Nombre de la persona"
+      },
+      {
+        "name": "Email",
+        "type": "varchar(160)",
+        "nullable": true,
+        "default": "",
+        "domain": "correo opcional; no identificador universal",
+        "definition": "Contacto"
+      },
+      {
+        "name": "BirthDate",
+        "type": "date",
+        "nullable": true,
+        "default": "",
+        "domain": "fecha de nacimiento opcional",
+        "definition": "Fecha de nacimiento"
+      }
+    ],
+    "constraints": [
+      "CONSTRAINT PK_Person PRIMARY KEY (PersonId)",
+      "CONSTRAINT CK_Person_Id CHECK (PersonId>0)",
+      "CONSTRAINT CK_Person_Name CHECK (LEN(LTRIM(RTRIM(FullName)))>0)"
+    ]
+  },
+  {
+    "name": "Customer",
+    "description": "Inscripción opcional de una persona; especialización uno a cero o uno.",
+    "columns": [
+      {
+        "name": "PersonId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "persona existente",
+        "definition": "Persona inscrita"
+      },
+      {
+        "name": "RegisteredAt",
+        "type": "datetime2(0)",
+        "nullable": false,
+        "default": "SYSUTCDATETIME()",
+        "domain": "instante UTC",
+        "definition": "Momento de registro"
+      }
+    ],
+    "constraints": [
+      "CONSTRAINT PK_Customer PRIMARY KEY (PersonId)",
+      "CONSTRAINT FK_Customer_Person FOREIGN KEY (PersonId) REFERENCES air.Person(PersonId)"
+    ]
+  },
+  {
+    "name": "Employee",
+    "description": "Empleado; se permiten personas que también son clientes.",
+    "columns": [
+      {
+        "name": "EmployeeId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "entero de carga",
+        "definition": "Identificador de empleado"
+      },
+      {
+        "name": "PersonId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "persona única",
+        "definition": "Persona empleada"
+      },
+      {
+        "name": "RoleCode",
+        "type": "varchar(10)",
+        "nullable": false,
+        "default": "",
+        "domain": "PILOT o CABIN o SALES",
+        "definition": "Función académica única"
+      },
+      {
+        "name": "Active",
+        "type": "bit",
+        "nullable": false,
+        "default": "1",
+        "domain": "0 o 1",
+        "definition": "Empleado habilitado"
+      }
+    ],
+    "constraints": [
+      "CONSTRAINT PK_Employee PRIMARY KEY (EmployeeId)",
+      "CONSTRAINT UQ_Employee_Person UNIQUE (PersonId)",
+      "CONSTRAINT FK_Employee_Person FOREIGN KEY (PersonId) REFERENCES air.Person(PersonId)",
+      "CONSTRAINT CK_Employee_Role CHECK (RoleCode IN ('PILOT','CABIN','SALES'))"
+    ]
+  },
+  {
+    "name": "Aircraft",
+    "description": "Avión; la capacidad se obtiene contando asientos, sin duplicar totales.",
+    "columns": [
+      {
+        "name": "AircraftId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "entero de carga",
+        "definition": "Identificador del avión"
+      },
+      {
+        "name": "Registration",
+        "type": "varchar(12)",
+        "nullable": false,
+        "default": "",
+        "domain": "matrícula sintética única",
+        "definition": "Matrícula"
+      },
+      {
+        "name": "Model",
+        "type": "nvarchar(60)",
+        "nullable": false,
+        "default": "",
+        "domain": "modelo académico",
+        "definition": "Descripción de aeronave"
+      },
+      {
+        "name": "Active",
+        "type": "bit",
+        "nullable": false,
+        "default": "1",
+        "domain": "0 o 1",
+        "definition": "Aeronave habilitada"
+      }
+    ],
+    "constraints": [
+      "CONSTRAINT PK_Aircraft PRIMARY KEY (AircraftId)",
+      "CONSTRAINT UQ_Aircraft_Reg UNIQUE (Registration)"
+    ]
+  },
+  {
+    "name": "AircraftSeat",
+    "description": "Configuración inmutable durante la muestra; una fila por asiento real.",
+    "columns": [
+      {
+        "name": "AircraftId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "avión existente",
+        "definition": "Avión al que pertenece"
+      },
+      {
+        "name": "SeatNo",
+        "type": "varchar(4)",
+        "nullable": false,
+        "default": "",
+        "domain": "asiento dentro del avión",
+        "definition": "Etiqueta de asiento"
+      },
+      {
+        "name": "CabinCode",
+        "type": "varchar(3)",
+        "nullable": false,
+        "default": "",
+        "domain": "VIP o ECO",
+        "definition": "Cabina del asiento"
+      }
+    ],
+    "constraints": [
+      "CONSTRAINT PK_AircraftSeat PRIMARY KEY (AircraftId,SeatNo)",
+      "CONSTRAINT UQ_AircraftSeat_Cabin UNIQUE (AircraftId,SeatNo,CabinCode)",
+      "CONSTRAINT FK_AircraftSeat_Aircraft FOREIGN KEY (AircraftId) REFERENCES air.Aircraft(AircraftId)",
+      "CONSTRAINT FK_AircraftSeat_Cabin FOREIGN KEY (CabinCode) REFERENCES air.Cabin(CabinCode)"
+    ]
+  },
+  {
+    "name": "Route",
+    "description": "Par ordenado de aeropuertos; la recurrencia se normaliza en Schedule.",
+    "columns": [
+      {
+        "name": "RouteId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "entero de carga",
+        "definition": "Identificador de ruta"
+      },
+      {
+        "name": "OriginCode",
+        "type": "char(3)",
+        "nullable": false,
+        "default": "",
+        "domain": "aeropuerto existente",
+        "definition": "Origen"
+      },
+      {
+        "name": "DestinationCode",
+        "type": "char(3)",
+        "nullable": false,
+        "default": "",
+        "domain": "aeropuerto distinto del origen",
+        "definition": "Destino"
+      }
+    ],
+    "constraints": [
+      "CONSTRAINT PK_Route PRIMARY KEY (RouteId)",
+      "CONSTRAINT UQ_Route_Pair UNIQUE (OriginCode,DestinationCode)",
+      "CONSTRAINT FK_Route_Origin FOREIGN KEY (OriginCode) REFERENCES air.Airport(AirportCode)",
+      "CONSTRAINT FK_Route_Destination FOREIGN KEY (DestinationCode) REFERENCES air.Airport(AirportCode)",
+      "CONSTRAINT CK_Route_Different CHECK (OriginCode<>DestinationCode)"
+    ]
+  },
+  {
+    "name": "Schedule",
+    "description": "Patrón recurrente semanal de una ruta, con hora local del origen.",
+    "columns": [
+      {
+        "name": "ScheduleId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "entero de carga",
+        "definition": "Identificador del patrón"
+      },
+      {
+        "name": "RouteId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "ruta existente",
+        "definition": "Ruta programada"
+      },
+      {
+        "name": "IsoWeekday",
+        "type": "tinyint",
+        "nullable": false,
+        "default": "",
+        "domain": "1 lunes a 7 domingo",
+        "definition": "Día ISO de salida"
+      },
+      {
+        "name": "DepartureLocal",
+        "type": "time(0)",
+        "nullable": false,
+        "default": "",
+        "domain": "00:00:00 a 23:59:59",
+        "definition": "Hora local prevista"
+      },
+      {
+        "name": "DurationMinutes",
+        "type": "smallint",
+        "nullable": false,
+        "default": "",
+        "domain": "30 a 900",
+        "definition": "Duración programada en minutos"
+      },
+      {
+        "name": "ValidFrom",
+        "type": "date",
+        "nullable": false,
+        "default": "",
+        "domain": "incluida",
+        "definition": "Primer día de vigencia"
+      },
+      {
+        "name": "ValidTo",
+        "type": "date",
+        "nullable": false,
+        "default": "",
+        "domain": "excluida; posterior a ValidFrom",
+        "definition": "Fin de vigencia"
+      }
+    ],
+    "constraints": [
+      "CONSTRAINT PK_Schedule PRIMARY KEY (ScheduleId)",
+      "CONSTRAINT FK_Schedule_Route FOREIGN KEY (RouteId) REFERENCES air.Route(RouteId)",
+      "CONSTRAINT CK_Schedule_Day CHECK (IsoWeekday BETWEEN 1 AND 7)",
+      "CONSTRAINT CK_Schedule_Duration CHECK (DurationMinutes BETWEEN 30 AND 900)",
+      "CONSTRAINT CK_Schedule_Validity CHECK (ValidFrom<ValidTo)",
+      "CONSTRAINT UQ_Schedule_Pattern UNIQUE (RouteId,IsoWeekday,DepartureLocal,ValidFrom)"
+    ]
+  },
+  {
+    "name": "Flight",
+    "description": "Instancia fechada; se crea por procedimiento a partir de Schedule.",
+    "columns": [
+      {
+        "name": "FlightId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "entero de carga",
+        "definition": "Identificador del vuelo"
+      },
+      {
+        "name": "ScheduleId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "programación existente",
+        "definition": "Patrón de origen"
+      },
+      {
+        "name": "AircraftId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "avión existente",
+        "definition": "Aeronave asignada de forma fija"
+      },
+      {
+        "name": "FlightDate",
+        "type": "date",
+        "nullable": false,
+        "default": "",
+        "domain": "fecha local de salida",
+        "definition": "Fecha de operación en el origen"
+      },
+      {
+        "name": "DepartureUtc",
+        "type": "datetime2(0)",
+        "nullable": false,
+        "default": "",
+        "domain": "instante UTC",
+        "definition": "Salida programada"
+      },
+      {
+        "name": "ArrivalUtc",
+        "type": "datetime2(0)",
+        "nullable": false,
+        "default": "",
+        "domain": "posterior a salida",
+        "definition": "Llegada programada"
+      },
+      {
+        "name": "Status",
+        "type": "varchar(10)",
+        "nullable": false,
+        "default": "'SCHEDULED'",
+        "domain": "SCHEDULED BOARDING DEPARTED ARRIVED CANCELLED",
+        "definition": "Estado operacional"
+      }
+    ],
+    "constraints": [
+      "CONSTRAINT PK_Flight PRIMARY KEY (FlightId)",
+      "CONSTRAINT UQ_Flight_Aircraft UNIQUE (FlightId,AircraftId)",
+      "CONSTRAINT UQ_Flight_Instance UNIQUE (ScheduleId,FlightDate)",
+      "CONSTRAINT FK_Flight_Schedule FOREIGN KEY (ScheduleId) REFERENCES air.Schedule(ScheduleId)",
+      "CONSTRAINT FK_Flight_Aircraft FOREIGN KEY (AircraftId) REFERENCES air.Aircraft(AircraftId)",
+      "CONSTRAINT CK_Flight_Times CHECK (DepartureUtc<ArrivalUtc)",
+      "CONSTRAINT CK_Flight_Status CHECK (Status IN ('SCHEDULED','BOARDING','DEPARTED','ARRIVED','CANCELLED'))"
+    ]
+  },
+  {
+    "name": "FlightSeat",
+    "description": "Inventario de plazas; copia controlada de la configuración del avión.",
+    "columns": [
+      {
+        "name": "FlightId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "vuelo existente",
+        "definition": "Vuelo"
+      },
+      {
+        "name": "AircraftId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "debe coincidir con avión de Flight",
+        "definition": "Avión; redundancia controlada por FK compuesta"
+      },
+      {
+        "name": "SeatNo",
+        "type": "varchar(4)",
+        "nullable": false,
+        "default": "",
+        "domain": "asiento físico del avión",
+        "definition": "Asiento ofrecido"
+      },
+      {
+        "name": "CabinCode",
+        "type": "varchar(3)",
+        "nullable": false,
+        "default": "",
+        "domain": "igual a cabina física",
+        "definition": "Cabina ofrecida"
+      }
+    ],
+    "constraints": [
+      "CONSTRAINT PK_FlightSeat PRIMARY KEY (FlightId,SeatNo)",
+      "CONSTRAINT UQ_FlightSeat_Cabin UNIQUE (FlightId,SeatNo,CabinCode)",
+      "CONSTRAINT FK_FlightSeat_Flight FOREIGN KEY (FlightId,AircraftId) REFERENCES air.Flight(FlightId,AircraftId)",
+      "CONSTRAINT FK_FlightSeat_Physical FOREIGN KEY (AircraftId,SeatNo,CabinCode) REFERENCES air.AircraftSeat(AircraftId,SeatNo,CabinCode)"
+    ]
+  },
+  {
+    "name": "CrewAssignment",
+    "description": "Asignación temporal de empleado a vuelo; no se modela certificación FAA.",
+    "columns": [
+      {
+        "name": "FlightId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "vuelo existente",
+        "definition": "Vuelo atendido"
+      },
+      {
+        "name": "EmployeeId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "empleado activo PILOT o CABIN",
+        "definition": "Tripulante"
+      }
+    ],
+    "constraints": [
+      "CONSTRAINT PK_CrewAssignment PRIMARY KEY (FlightId,EmployeeId)",
+      "CONSTRAINT FK_CrewAssignment_Flight FOREIGN KEY (FlightId) REFERENCES air.Flight(FlightId)",
+      "CONSTRAINT FK_CrewAssignment_Employee FOREIGN KEY (EmployeeId) REFERENCES air.Employee(EmployeeId)"
+    ]
+  },
+  {
+    "name": "SalesChannel",
+    "description": "Punto físico o web de venta, distinto de los aeropuertos.",
+    "columns": [
+      {
+        "name": "ChannelId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "entero de carga",
+        "definition": "Identificador de canal"
+      },
+      {
+        "name": "Name",
+        "type": "nvarchar(80)",
+        "nullable": false,
+        "default": "",
+        "domain": "nombre",
+        "definition": "Nombre del punto de venta"
+      },
+      {
+        "name": "Kind",
+        "type": "varchar(8)",
+        "nullable": false,
+        "default": "",
+        "domain": "PHYSICAL o WEB",
+        "definition": "Tipo de canal"
+      },
+      {
+        "name": "Address",
+        "type": "nvarchar(200)",
+        "nullable": true,
+        "default": "",
+        "domain": "obligatoria solo en PHYSICAL",
+        "definition": "Dirección postal sintética"
+      },
+      {
+        "name": "Url",
+        "type": "varchar(200)",
+        "nullable": true,
+        "default": "",
+        "domain": "obligatoria solo en WEB; https",
+        "definition": "URL de demostración"
+      },
+      {
+        "name": "AirportCode",
+        "type": "char(3)",
+        "nullable": true,
+        "default": "",
+        "domain": "aeropuerto opcional para oficina física",
+        "definition": "Aeropuerto asociado"
+      }
+    ],
+    "constraints": [
+      "CONSTRAINT PK_SalesChannel PRIMARY KEY (ChannelId)",
+      "CONSTRAINT FK_SalesChannel_Airport FOREIGN KEY (AirportCode) REFERENCES air.Airport(AirportCode)",
+      "CONSTRAINT CK_SalesChannel_Kind CHECK ((Kind='PHYSICAL' AND Address IS NOT NULL AND Url IS NULL) OR (Kind='WEB' AND Address IS NULL AND Url IS NOT NULL AND Url LIKE 'https://%' AND AirportCode IS NULL))"
+    ]
+  },
+  {
+    "name": "Fare",
+    "description": "Versión de tarifa por ruta y cabina; vigencia por instante de compra UTC.",
+    "columns": [
+      {
+        "name": "FareId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "entero de carga",
+        "definition": "Versión tarifaria"
+      },
+      {
+        "name": "RouteId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "ruta existente",
+        "definition": "Ruta tarifada"
+      },
+      {
+        "name": "CabinCode",
+        "type": "varchar(3)",
+        "nullable": false,
+        "default": "",
+        "domain": "VIP o ECO",
+        "definition": "Cabina tarifada"
+      },
+      {
+        "name": "ValidFrom",
+        "type": "datetime2(0)",
+        "nullable": false,
+        "default": "",
+        "domain": "incluido UTC",
+        "definition": "Inicio de venta"
+      },
+      {
+        "name": "ValidTo",
+        "type": "datetime2(0)",
+        "nullable": false,
+        "default": "",
+        "domain": "excluido UTC",
+        "definition": "Fin de venta"
+      },
+      {
+        "name": "Price",
+        "type": "decimal(12,2)",
+        "nullable": false,
+        "default": "",
+        "domain": "mayor que 0; USD",
+        "definition": "Precio original antes de descuento"
+      }
+    ],
+    "constraints": [
+      "CONSTRAINT PK_Fare PRIMARY KEY (FareId)",
+      "CONSTRAINT FK_Fare_Route FOREIGN KEY (RouteId) REFERENCES air.Route(RouteId)",
+      "CONSTRAINT FK_Fare_Cabin FOREIGN KEY (CabinCode) REFERENCES air.Cabin(CabinCode)",
+      "CONSTRAINT CK_Fare_Validity CHECK (ValidFrom<ValidTo)",
+      "CONSTRAINT CK_Fare_Price CHECK (Price>0)"
+    ]
+  },
+  {
+    "name": "Discount",
+    "description": "Promoción porcentual global académica; como máximo una por tiquete.",
+    "columns": [
+      {
+        "name": "DiscountId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "entero de carga",
+        "definition": "Identificador de descuento"
+      },
+      {
+        "name": "Code",
+        "type": "varchar(20)",
+        "nullable": false,
+        "default": "",
+        "domain": "único",
+        "definition": "Código promocional"
+      },
+      {
+        "name": "PercentValue",
+        "type": "decimal(5,2)",
+        "nullable": false,
+        "default": "",
+        "domain": "mayor que 0 y hasta 30",
+        "definition": "Porcentaje de descuento"
+      },
+      {
+        "name": "ValidFrom",
+        "type": "datetime2(0)",
+        "nullable": false,
+        "default": "",
+        "domain": "incluido UTC",
+        "definition": "Inicio de vigencia"
+      },
+      {
+        "name": "ValidTo",
+        "type": "datetime2(0)",
+        "nullable": false,
+        "default": "",
+        "domain": "excluido UTC",
+        "definition": "Fin de vigencia"
+      }
+    ],
+    "constraints": [
+      "CONSTRAINT PK_Discount PRIMARY KEY (DiscountId)",
+      "CONSTRAINT UQ_Discount_Code UNIQUE (Code)",
+      "CONSTRAINT CK_Discount_Percent CHECK (PercentValue>0 AND PercentValue<=30)",
+      "CONSTRAINT CK_Discount_Validity CHECK (ValidFrom<ValidTo)"
+    ]
+  },
+  {
+    "name": "Ticket",
+    "description": "Contrato para una persona y un asiento de un vuelo; importes históricos USD.",
+    "columns": [
+      {
+        "name": "TicketId",
+        "type": "bigint IDENTITY(1,1)",
+        "nullable": false,
+        "default": "",
+        "domain": "autonumérico",
+        "definition": "Identificador del tiquete"
+      },
+      {
+        "name": "RequestKey",
+        "type": "uniqueidentifier",
+        "nullable": false,
+        "default": "",
+        "domain": "único; clave de idempotencia de emisión",
+        "definition": "Identificador estable del intento de compra"
+      },
+      {
+        "name": "FlightId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "vuelo existente",
+        "definition": "Vuelo adquirido"
+      },
+      {
+        "name": "SeatNo",
+        "type": "varchar(4)",
+        "nullable": false,
+        "default": "",
+        "domain": "asiento disponible",
+        "definition": "Asiento asignado"
+      },
+      {
+        "name": "CabinCode",
+        "type": "varchar(3)",
+        "nullable": false,
+        "default": "",
+        "domain": "coincide con inventario",
+        "definition": "Cabina adquirida"
+      },
+      {
+        "name": "PassengerId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "persona con o sin registro",
+        "definition": "Persona que viaja"
+      },
+      {
+        "name": "BuyerId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "persona con o sin registro",
+        "definition": "Persona que compra"
+      },
+      {
+        "name": "ChannelId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "canal existente",
+        "definition": "Canal de venta"
+      },
+      {
+        "name": "FareId",
+        "type": "int",
+        "nullable": false,
+        "default": "",
+        "domain": "tarifa única vigente al vender",
+        "definition": "Versión de referencia"
+      },
+      {
+        "name": "DiscountId",
+        "type": "int",
+        "nullable": true,
+        "default": "",
+        "domain": "promoción vigente opcional",
+        "definition": "Promoción aplicada"
+      },
+      {
+        "name": "OriginalPrice",
+        "type": "decimal(12,2)",
+        "nullable": false,
+        "default": "",
+        "domain": "positivo USD; copia al vender",
+        "definition": "Precio original histórico"
+      },
+      {
+        "name": "DiscountPercent",
+        "type": "decimal(5,2)",
+        "nullable": false,
+        "default": "0",
+        "domain": "0 a 30",
+        "definition": "Porcentaje histórico no acumulable"
+      },
+      {
+        "name": "SoldAt",
+        "type": "datetime2(0)",
+        "nullable": false,
+        "default": "SYSUTCDATETIME()",
+        "domain": "instante de compra UTC anterior a salida",
+        "definition": "Fecha de venta"
+      },
+      {
+        "name": "Status",
+        "type": "varchar(10)",
+        "nullable": false,
+        "default": "'HELD'",
+        "domain": "HELD PARTIAL PAID CANCELLED",
+        "definition": "Estado de reserva y cobro"
+      },
+      {
+        "name": "CancelledAt",
+        "type": "datetime2(0)",
+        "nullable": true,
+        "default": "",
+        "domain": "UTC; solo CANCELLED",
+        "definition": "Instante de cancelación"
+      },
+      {
+        "name": "CancelReason",
+        "type": "nvarchar(200)",
+        "nullable": true,
+        "default": "",
+        "domain": "solo CANCELLED",
+        "definition": "Motivo de cancelación"
+      },
+      {
+        "name": "FinalPrice",
+        "type": "decimal(12,2) COMPUTED PERSISTED",
+        "nullable": true,
+        "default": "",
+        "domain": "ROUND(OriginalPrice*(1-DiscountPercent/100),2); operandos NOT NULL",
+        "definition": "Precio final histórico calculado; el catálogo puede inferir nulabilidad aunque la expresión es total"
+      }
+    ],
+    "constraints": [
+      "CONSTRAINT PK_Ticket PRIMARY KEY (TicketId)",
+      "CONSTRAINT UQ_Ticket_Request UNIQUE (RequestKey)",
+      "CONSTRAINT FK_Ticket_Seat FOREIGN KEY (FlightId,SeatNo,CabinCode) REFERENCES air.FlightSeat(FlightId,SeatNo,CabinCode)",
+      "CONSTRAINT FK_Ticket_Passenger FOREIGN KEY (PassengerId) REFERENCES air.Person(PersonId)",
+      "CONSTRAINT FK_Ticket_Buyer FOREIGN KEY (BuyerId) REFERENCES air.Person(PersonId)",
+      "CONSTRAINT FK_Ticket_Channel FOREIGN KEY (ChannelId) REFERENCES air.SalesChannel(ChannelId)",
+      "CONSTRAINT FK_Ticket_Fare FOREIGN KEY (FareId) REFERENCES air.Fare(FareId)",
+      "CONSTRAINT FK_Ticket_Discount FOREIGN KEY (DiscountId) REFERENCES air.Discount(DiscountId)",
+      "CONSTRAINT CK_Ticket_Price CHECK (OriginalPrice>0 AND DiscountPercent BETWEEN 0 AND 30)",
+      "CONSTRAINT CK_Ticket_Promotion CHECK ((DiscountId IS NULL AND DiscountPercent=0) OR (DiscountId IS NOT NULL AND DiscountPercent>0))",
+      "CONSTRAINT CK_Ticket_Status CHECK (Status IN ('HELD','PARTIAL','PAID','CANCELLED'))",
+      "CONSTRAINT CK_Ticket_Cancel CHECK ((Status='CANCELLED' AND CancelledAt IS NOT NULL AND CancelReason IS NOT NULL AND CancelledAt>=SoldAt) OR (Status<>'CANCELLED' AND CancelledAt IS NULL AND CancelReason IS NULL))"
+    ]
+  },
+  {
+    "name": "Payment",
+    "description": "Intento de cobro; solo confirmado o fallido, sin pasarela real.",
+    "columns": [
+      {
+        "name": "PaymentId",
+        "type": "bigint IDENTITY(1,1)",
+        "nullable": false,
+        "default": "",
+        "domain": "autonumérico",
+        "definition": "Identificador de pago"
+      },
+      {
+        "name": "TicketId",
+        "type": "bigint",
+        "nullable": false,
+        "default": "",
+        "domain": "tiquete existente",
+        "definition": "Tiquete abonado"
+      },
+      {
+        "name": "RequestKey",
+        "type": "uniqueidentifier",
+        "nullable": false,
+        "default": "",
+        "domain": "único e idempotente",
+        "definition": "Clave de operación de cobro"
+      },
+      {
+        "name": "Amount",
+        "type": "decimal(12,2)",
+        "nullable": false,
+        "default": "",
+        "domain": "mayor que 0 USD",
+        "definition": "Importe del intento"
+      },
+      {
+        "name": "Status",
+        "type": "varchar(9)",
+        "nullable": false,
+        "default": "",
+        "domain": "CONFIRMED o FAILED",
+        "definition": "Resultado definitivo simulado"
+      },
+      {
+        "name": "Method",
+        "type": "varchar(10)",
+        "nullable": false,
+        "default": "",
+        "domain": "CARD CASH TRANSFER",
+        "definition": "Medio de pago sin datos bancarios"
+      },
+      {
+        "name": "PaidAt",
+        "type": "datetime2(0)",
+        "nullable": false,
+        "default": "SYSUTCDATETIME()",
+        "domain": "UTC; no anterior a venta",
+        "definition": "Fecha de intento"
+      }
+    ],
+    "constraints": [
+      "CONSTRAINT PK_Payment PRIMARY KEY (PaymentId)",
+      "CONSTRAINT UQ_Payment_Request UNIQUE (RequestKey)",
+      "CONSTRAINT FK_Payment_Ticket FOREIGN KEY (TicketId) REFERENCES air.Ticket(TicketId)",
+      "CONSTRAINT CK_Payment_Amount CHECK (Amount>0)",
+      "CONSTRAINT CK_Payment_Status CHECK (Status IN ('CONFIRMED','FAILED'))",
+      "CONSTRAINT CK_Payment_Method CHECK (Method IN ('CARD','CASH','TRANSFER'))"
+    ]
+  },
+  {
+    "name": "Refund",
+    "description": "Reembolso contable total de un pago confirmado al cancelar.",
+    "columns": [
+      {
+        "name": "RefundId",
+        "type": "bigint IDENTITY(1,1)",
+        "nullable": false,
+        "default": "",
+        "domain": "autonumérico",
+        "definition": "Identificador del reembolso"
+      },
+      {
+        "name": "PaymentId",
+        "type": "bigint",
+        "nullable": false,
+        "default": "",
+        "domain": "pago confirmado; uno por pago",
+        "definition": "Pago revertido íntegramente"
+      },
+      {
+        "name": "Amount",
+        "type": "decimal(12,2)",
+        "nullable": false,
+        "default": "",
+        "domain": "mayor que 0 USD",
+        "definition": "Importe devuelto"
+      },
+      {
+        "name": "RefundedAt",
+        "type": "datetime2(0)",
+        "nullable": false,
+        "default": "SYSUTCDATETIME()",
+        "domain": "UTC posterior o igual a pago",
+        "definition": "Instante del registro"
+      }
+    ],
+    "constraints": [
+      "CONSTRAINT PK_Refund PRIMARY KEY (RefundId)",
+      "CONSTRAINT UQ_Refund_Payment UNIQUE (PaymentId)",
+      "CONSTRAINT FK_Refund_Payment FOREIGN KEY (PaymentId) REFERENCES air.Payment(PaymentId)",
+      "CONSTRAINT CK_Refund_Amount CHECK (Amount>0)"
+    ]
+  },
+  {
+    "name": "StatusEvent",
+    "description": "Auditoría de transiciones; entidad por referencias excluyentes.",
+    "columns": [
+      {
+        "name": "EventId",
+        "type": "bigint IDENTITY(1,1)",
+        "nullable": false,
+        "default": "",
+        "domain": "autonumérico",
+        "definition": "Identificador de evento"
+      },
+      {
+        "name": "TicketId",
+        "type": "bigint",
+        "nullable": true,
+        "default": "",
+        "domain": "tiquete o vuelo; exactamente uno",
+        "definition": "Tiquete afectado"
+      },
+      {
+        "name": "FlightId",
+        "type": "int",
+        "nullable": true,
+        "default": "",
+        "domain": "tiquete o vuelo; exactamente uno",
+        "definition": "Vuelo afectado"
+      },
+      {
+        "name": "FromStatus",
+        "type": "varchar(10)",
+        "nullable": true,
+        "default": "",
+        "domain": "nulo para creación",
+        "definition": "Estado previo"
+      },
+      {
+        "name": "ToStatus",
+        "type": "varchar(10)",
+        "nullable": false,
+        "default": "",
+        "domain": "estado destino de la entidad",
+        "definition": "Nuevo estado"
+      },
+      {
+        "name": "ChangedAt",
+        "type": "datetime2(0)",
+        "nullable": false,
+        "default": "SYSUTCDATETIME()",
+        "domain": "UTC del evento académico",
+        "definition": "Momento del cambio"
+      },
+      {
+        "name": "Actor",
+        "type": "sysname",
+        "nullable": false,
+        "default": "SUSER_SNAME()",
+        "domain": "principal SQL",
+        "definition": "Usuario que ejecutó"
+      }
+    ],
+    "constraints": [
+      "CONSTRAINT PK_StatusEvent PRIMARY KEY (EventId)",
+      "CONSTRAINT FK_StatusEvent_Ticket FOREIGN KEY (TicketId) REFERENCES air.Ticket(TicketId)",
+      "CONSTRAINT FK_StatusEvent_Flight FOREIGN KEY (FlightId) REFERENCES air.Flight(FlightId)",
+      "CONSTRAINT CK_StatusEvent_Entity CHECK ((TicketId IS NOT NULL AND FlightId IS NULL) OR (TicketId IS NULL AND FlightId IS NOT NULL))"
+    ]
+  }
+]

@@ -1,0 +1,18 @@
+{
+  "observed_utc": "2026-10-27T01:51:10.956917+00:00",
+  "source_documents_read": 4,
+  "tables_designed": 19,
+  "attributes_documented": 99,
+  "select_queries_prepared": 18,
+  "offline_tests_passed": 21,
+  "query_parser_accepted": 18,
+  "sql_tests_pending": 34,
+  "synthetic_flights_planned": 32,
+  "synthetic_tickets_planned": 896,
+  "sql_execution": "PENDIENTE; motor no accesible; descargas bloqueadas por red",
+  "windows_laptop": "PENDIENTE; sin acceso",
+  "azure": "PENDIENTE; no desplegado ni recursos creados",
+  "github": "PREPARADO; no publicado",
+  "slides": 13,
+  "presentation_seconds": 1200
+}

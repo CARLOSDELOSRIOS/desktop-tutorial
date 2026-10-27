@@ -1,0 +1,47 @@
+﻿ID,requisito,documento_pagina_seccion,obligatorio_o_mejora,archivo_implementacion,prueba_o_evidencia,estado
+AC01,Requisitos empresariales de aerolínea de EE. UU.,F01 Planteamiento; F03 p.21; F04 pp.21–22,Obligatorio documental,docs/requisitos_y_reglas.md,actores y RN01–RN23,Preparado; revisión del equipo pendiente
+AC02,Base de datos en la nube,F01 Planteamiento; F03 p.21; F04 pp.21–22,Obligatorio documental,docs/azure.md; scripts/deploy_azure.ps1,EngineEdition=5; reports/azure,Preparado; despliegue PENDIENTE
+AC03,Diseño y normalización,F02 p.4; F03 p.10; F04 p.10,Obligatorio documental,docs/modelado_normalizacion.md; docs/*.dot,DF y excepciones de 3FN explícitas,Preparado; coherencia estructural revisada
+AC04,Tablas y restricciones,F02 pp.5–6; F01 Planteamiento,Obligatorio documental,sql/01_schema.sql; 02_indexes.sql,diccionario 19 tablas/99 atributos; pruebas offline,Generado; ejecución SQL PENDIENTE
+AC05,Inserción de datos,F01 Planteamiento; F03 p.21; F04 p.22,Obligatorio documental,sql/03_reference.sql; 07_synthetic.sql,generation_manifest.json; 32 vuelos/896 tiquetes planeados,Generación ejecutada; carga PENDIENTE
+AC06,DML seguro,F02 p.7; F03 pp.16–18; F04 pp.17–19,Obligatorio documental,sql/09_safe_dml.sql,INSERT UPDATE DELETE con rollback,Preparado; ejecución PENDIENTE
+AC07,JOIN y LEFT JOIN,F02 p.8; F03 p.17; F04 p.18,Obligatorio documental,sql/queries/Q08.sql; Q09.sql,query_parse.json,Sintaxis parcial revisada; ejecución PENDIENTE
+AC08,"Agrupación, HAVING, agregaciones",F02 p.8; F03 p.17; F04 p.18,Obligatorio documental,sql/queries/Q02.sql; Q14.sql,CSV y manifest tras ejecución,Preparado; ejecución PENDIENTE
+AC09,Vistas,F01 Logro; F02 p.8,Obligatorio documental,sql/04_views.sql,vTicketFinance vOccupancy vFlightLocal,Preparado; ejecución PENDIENTE
+AC10,Procedimientos almacenados,F01 Logro; F02 p.8,Obligatorio documental,sql/05_procedures.sql,test_engine.py,Preparado; ejecución PENDIENTE
+AC11,Consultas desde un lenguaje de programación,F01 Planteamiento; F03 p.21; F04 p.22,Obligatorio documental,src/airline/db.py; analysis.py,18 CSV reales solo tras conexión,Integración preparada; conexión PENDIENTE
+AC12,"Equipo, proyecto y scripts en GitHub",F03 p.22; F04 p.22,Obligatorio documental,README.md; .gitignore; docs/aportes.csv,URL y aportes reales del equipo,Repositorio preparado; publicación NO autorizada/PENDIENTE
+AC13,10–15 diapositivas y 20 minutos,F03 p.22; F04 p.22,Obligatorio documental,slides/presentacion.pptx; slides/notas.md,13 diapositivas; tiempos 1200 s,Generado; ensayo del equipo PENDIENTE
+AC14,Todos exponen aleatoriamente,F03 p.22; F04 p.23,Obligatorio documental,docs/defensa.md; slides/notas.md,guía común; sin asignaciones inventadas,Preparado; práctica PENDIENTE
+AC15,Carátula de participantes activos y entrega por líder,F01 Entrega; F03 p.22; F04 p.23,Obligatorio documental,reports/informe.md; docs/aportes.csv,campos [POR COMPLETAR],PENDIENTE de datos reales del equipo
+AC16,"Cuatro criterios de rúbrica, 5 puntos cada uno",F01 Rúbrica; F03 p.23; F04 p.24,Obligatorio documental,docs/revision_final.md,revisión cualitativa sin nota fabricada,Cobertura revisada; evaluación corresponde al docente
+AC17,Mínimo de páginas,Rúbricas citadas sin cifra en fuentes,Pendiente documental,docs/fuentes_y_discrepancias.md,lectura completa de F01–F04,PENDIENTE de confirmación; propuesta 20–30 incl. anexos
+U01,"Entorno Windows, edición, versión, SSMS, permisos y ODBC",U01 sección 3,Instrucción actual obligatoria,scripts/diagnose_windows.ps1; sql/00_diagnostic.sql,environment_remote.json,Remoto inspeccionado; laptop PENDIENTE
+U02,"Persona, comprador y pasajero sin registro",U01 sección 4,Instrucción actual obligatoria,sql/01_schema.sql; 05_procedures.sql,test_guest_buyer_and_passenger,Preparado; prueba SQL PENDIENTE
+U03,"Capacidad, asientos y no sobreventa",U01 sección 4 y 6,Instrucción actual obligatoria,sql/02_indexes.sql; 05_procedures.sql,ConcurrencyTests; A02–A03,Pruebas de insumos ejecutadas; SQL PENDIENTE
+U04,Tarifas vigentes y precio histórico,U01 sección 4 y 6,Instrucción actual obligatoria,sql/05_procedures.sql; docs/modelado_normalizacion.md,test_price_history_after_reference_change,Preparado; SQL PENDIENTE
+U05,Descuentos porcentuales no acumulables,U01 sección 4,Instrucción actual obligatoria,sql/01_schema.sql; 05_procedures.sql,CHECK y test_invalid_discount,Preparado; SQL PENDIENTE
+U06,"Pagos parciales, fallidos y múltiples",U01 sección 4 y 6,Instrucción actual obligatoria,sql/05_procedures.sql; 04_views.sql,test_partial_and_multiple_payments,Preparado; SQL PENDIENTE
+U07,Cancelaciones y reembolsos,U01 sección 4 y 6,Instrucción actual obligatoria,sql/05_procedures.sql,test_cancel_full_refund_idempotent; A05–A06,Preparado; SQL PENDIENTE
+U08,"Estados, transiciones y fechas",U01 sección 4,Instrucción actual obligatoria,sql/05_procedures.sql; 10_audit.sql,pruebas de estados y tiempos,Preparado; SQL PENDIENTE
+U09,Asignación temporal de avión y tripulación,U01 sección 4,Instrucción actual obligatoria,sql/05_procedures.sql,A11–A12; pruebas de solapamiento,Plan sintético revisado; SQL PENDIENTE
+U10,USD y tipos decimales,U01 sección 4,Instrucción actual obligatoria,docs/schema.json; sql/01_schema.sql,test_financial_inputs,Insumos verificados; SQL PENDIENTE
+U11,Diagramas editables y exportaciones,U01 sección 5,Instrucción actual obligatoria,docs/modelo_*.dot; .mmd; .svg; .pdf,renderizado Graphviz,Generado; revisión visual realizada al empaquetar
+U12,Diccionario completo por atributo,U01 sección 5,Instrucción actual obligatoria,docs/diccionario.md; data_dictionary.csv,test_dictionary_matches_ddl,99 atributos documentados; prueba offline superada
+U13,3FN y desnormalizaciones justificadas,U01 sección 5,Instrucción actual obligatoria,docs/modelado_normalizacion.md,dependencias funcionales y excepciones físicas,Documentado
+U14,"Orden, dependencias y reinicio destructivo separado",U01 sección 6,Instrucción actual obligatoria,README.md; sql/99_DESTRUCTIVE_reset.sql,init falla si existe esquema; reset bloqueado,Preparado; SQL PENDIENTE
+U15,"Transacciones, errores y concurrencia",U01 sección 6,Instrucción actual obligatoria,sql/05_procedures.sql; tests/test_engine.py,rollback e independencia de sesiones,Preparado; ejecución PENDIENTE
+U16,GO separado por Python,U01 sección 6,Instrucción actual obligatoria,src/airline/db.py,test_split_go_not_sent y casos de cadenas/comentarios,Pruebas offline superadas
+U17,Semilla y coherencia de insumos sintéticos,U01 sección 7,Instrucción actual obligatoria,src/airline/generate.py; data/synthetic_plan.json,generation_manifest.json; tests de insumos,Generación y verificaciones ejecutadas
+U18,Al menos 15 consultas como meta propuesta,U01 sección 8,Instrucción actual obligatoria,sql/queries; docs/consultas.md,18 SELECT y DML separado,18 SELECT analizados por parser; ejecución PENDIENTE
+U19,Conciliación sin multiplicar importes,U01 sección 8,Instrucción actual obligatoria,sql/04_views.sql; Q15.sql,A07; test_aggregation_not_multiplied,Preparado; SQL PENDIENTE
+U20,"Python: configuración, parámetros, CSV y gráficos",U01 sección 9,Instrucción actual obligatoria,src/airline; requirements.txt; .env.example,test_offline.py; reports/local al ejecutar,Configuración probada; resultados SQL PENDIENTES
+U21,Pruebas y evidencias reales por destino,U01 sección 10,Instrucción actual obligatoria,tests; evidence; docs/pruebas.md,20 offline; suite SQL marcada pendiente,Ejecutado parcialmente; sin evidencia inventada
+U22,Nube después del desarrollo local,U01 sección 11,Instrucción actual obligatoria,docs/azure.md; scripts/deploy_azure.ps1,EngineEdition=5 obligatorio en analyze,Preparado; cuenta/autorización/despliegue PENDIENTES
+U23,Informe formal y referencias verificables,U01 sección 12,Instrucción actual obligatoria,reports/informe.md; .docx; .pdf,evidence/reference_checks.json,Generado; resultados empíricos PENDIENTES
+U24,"Presentación, notas, demo y ≥15 preguntas",U01 sección 13,Instrucción actual obligatoria,slides; docs/defensa.md,13 diapositivas y 18 preguntas razonadas,Generado
+U25,GitHub sin secretos ni historial fabricado,U01 sección 14,Instrucción actual obligatoria,README.md; .gitignore; docs/aportes.csv,test_no_secrets_committed,Preparado; sin publicación ni commits de terceros
+U26,Revisión final y pendientes efectivos,U01 sección 15,Instrucción actual obligatoria,docs/revision_final.md; evidence/status.json,matriz de trazabilidad y revisión,Realizada con límites explícitos
+MP01,Idempotencia de emisión y pago,Diseño del proyecto,Mejora propuesta,sql/05_procedures.sql,test_idempotent_issue; test_idempotent_payment,Preparado; SQL PENDIENTE
+MP02,Bloqueo global de escrituras,Diseño académico acotado,Supuesto técnico reversible,sql/05_procedures.sql; docs/seguridad.md,prueba concurrente de última plaza,Preparado; SQL PENDIENTE
+MP03,Reserva sin expiración automática y reembolso completo,Diseño del proyecto,Supuesto académico,docs/requisitos_y_reglas.md,pruebas de cancelación,Documentado; validar política con equipo

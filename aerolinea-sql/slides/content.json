@@ -1,0 +1,143 @@
+[
+  {
+    "title": "Una plaza, una venta válida",
+    "subtitle": "Base de datos de aerolínea · PAC PSMA00611",
+    "seconds": 60,
+    "bullets": [
+      "Participantes activos y líder: [POR COMPLETAR]",
+      "SQL Server + Python; datos sintéticos en USD",
+      "Versión preparada: ejecución SQL y Azure pendientes"
+    ],
+    "notes": "Presentar el objetivo: vender plazas finitas y conciliar pagos sin duplicar información. Identificar participantes reales. Declarar desde el inicio qué se ejecutó y qué permanece pendiente."
+  },
+  {
+    "title": "Problema, objetivos y alcance",
+    "seconds": 90,
+    "bullets": [
+      "Comprar sin registro; comprador y pasajero pueden diferir",
+      "Evitar dos reservas activas del mismo asiento",
+      "Distinguir contratos, cobros y reembolsos",
+      "Alcance: un pasajero y un vuelo por tiquete; dos cabinas"
+    ],
+    "notes": "Explicar un caso concreto: una persona compra para otra y paga en dos abonos. Una tabla plana duplicaría el precio al sumar los pagos. El objetivo es integridad relacional, con análisis descriptivo y sin modelos predictivos."
+  },
+  {
+    "title": "Requisitos con fuente y límites",
+    "seconds": 75,
+    "bullets": [
+      "Nube, modelo, tablas, DML, vistas y procedimientos",
+      "GitHub; 10–15 diapositivas, 20 minutos, exposición aleatoria",
+      "46 filas de trazabilidad; fuentes separadas de supuestos",
+      "Calendario discrepante y mínimo de páginas sin cifra"
+    ],
+    "notes": "Citar guía VIERNES pp. 21–23 y guía general pp. 21–24. No suponer que el nombre VIERNES identifica vigencia. Rúbrica de cuatro criterios, máximo 20. Confirmar calendario y páginas con el docente."
+  },
+  {
+    "title": "Arquitectura reproducible",
+    "seconds": 90,
+    "image": "docs/arquitectura.png",
+    "bullets": [
+      "SSMS administra; SQL Server almacena; Python automatiza",
+      "Windows local y Azure son destinos con evidencia separada"
+    ],
+    "notes": "Mostrar que localhost de este entorno remoto no es la laptop. En local usar autenticación Windows y cifrado; Azure requiere FQDN y certificado válido. No se han creado recursos facturables."
+  },
+  {
+    "title": "Del concepto a las relaciones",
+    "seconds": 120,
+    "image": "docs/modelo_conceptual_resumen.png",
+    "bullets": [
+      "Persona → tiquete → pagos → reembolso",
+      "Ruta → programación → vuelo → plaza"
+    ],
+    "notes": "Recorrer las dos cadenas. Customer es inscripción opcional de Person. Un vuelo procede de un patrón semanal y ofrece asientos del avión. Canal comercial es distinto de aeropuerto. Mostrar el SVG ampliable si se necesita detalle."
+  },
+  {
+    "title": "Normalización e historia comercial",
+    "seconds": 105,
+    "bullets": [
+      "Dependencias funcionales y claves candidatas explícitas",
+      "Sin listas de pagos ni repetición de aeropuertos por venta",
+      "Precio de venta es un hecho histórico",
+      "Excepciones físicas: AircraftId, CabinCode y precio calculado"
+    ],
+    "notes": "No afirmar que todo el físico es 3FN estricta. FlightSeat.AircraftId permite FK compuestas a vuelo y asiento físico; Ticket.CabinCode también está protegido por FK. Explicar anomalías evitadas y el límite de cada desnormalización."
+  },
+  {
+    "title": "Integridad de plazas y recursos",
+    "seconds": 120,
+    "bullets": [
+      "Inventario por asiento; capacidad por cabina = conteo",
+      "FK + CHECK + índice único de asiento activo",
+      "Transacción + bloqueo de escritura compartido por la API",
+      "Avión y tripulación: intervalos sin solapar, más 45 minutos"
+    ],
+    "notes": "Explicar la carrera por la última plaza: leer disponible e insertar por separado es insuficiente. El bloqueo global serializa las operaciones y el índice impide dos activos incluso en una escritura directa. Conceder el costo de bajo paralelismo y que los 45 minutos son supuesto académico."
+  },
+  {
+    "title": "Venta, cobro y cancelación atómicos",
+    "seconds": 105,
+    "bullets": [
+      "HELD → PARTIAL → PAID; cancelación conserva historia",
+      "Pago fallido no cuenta; cobro confirmado no excede saldo",
+      "UUID estable evita duplicar reintentos",
+      "Cancelación devuelve cobros y libera plaza en una transacción"
+    ],
+    "notes": "Seguir el caso de dos pagos. La devolución es contable y sintética: no hay integración bancaria. XACT_ABORT, TRY/CATCH y THROW revierten toda la unidad de trabajo ante error. El operador no puede saltarse la API con DML directo."
+  },
+  {
+    "title": "Python y datos reproducibles",
+    "seconds": 90,
+    "bullets": [
+      "Semilla 6112026; 32 vuelos y 896 solicitudes planeadas",
+      "pyodbc + parámetros; GO procesado por el cliente",
+      "CSV y figuras solo a partir de consultas ejecutadas",
+      "Hashes y destino en cada manifiesto de resultados"
+    ],
+    "notes": "Distinguir generación de insumos de carga SQL real. La muestra cubre ambas cabinas, canales, inscritos/invitados, pagos múltiples y cancelaciones. No generalizar patrones sintéticos al mercado."
+  },
+  {
+    "title": "Análisis que concilia",
+    "seconds": 105,
+    "bullets": [
+      "18 consultas: ocupación, canales, saldos, caja y flota",
+      "Pagos agregados por tiquete antes del JOIN",
+      "Ventas netas = caja neta + saldo, según la cohorte",
+      "Sin costos no se calcula rentabilidad"
+    ],
+    "notes": "Presentar Q01, Q03 y Q15 en el guion de demo. Definir ocupación reservada y pagada y el denominador de capacidad. Q04 usa fecha de caja; Q03 usa cohorte de venta. No mostrar cifras SQL inexistentes. Tras la ejecución, incorporar las tablas y figuras reales."
+  },
+  {
+    "title": "Pruebas: evidencia y pendientes",
+    "seconds": 90,
+    "bullets": [
+      "21 pruebas offline superadas; 18 SELECT analizados parcialmente",
+      "34 pruebas SQL preparadas y pendientes",
+      "Dos sesiones competirán por la última plaza",
+      "Motor remoto: descarga bloqueada; laptop aún no comprobada"
+    ],
+    "notes": "Decir exactamente lo observado: las comprobaciones de Python no demuestran ejecución T-SQL. La prueba concurrente exige un éxito y un rechazo y solo debe mostrarse como resultado cuando se ejecute. En la demo usar la base _Test aislada."
+  },
+  {
+    "title": "Azure y demostración verificable",
+    "seconds": 90,
+    "bullets": [
+      "Desarrollo local primero; despliegue Azure aún pendiente",
+      "Certificado validado y acceso limitado al cliente",
+      "Evidencia necesaria: EngineEdition=5 + consultas y pruebas",
+      "GitHub se publica solo con autorización del equipo"
+    ],
+    "notes": "Mostrar la guía, configuración y script preparados. Cuando se autorice y despliegue, demostrar una consulta real de nube. Una captura local no satisface el requisito. Si aún no existe ejecución, reconocerlo como pendiente de la entrega académica."
+  },
+  {
+    "title": "Conclusiones y cierre del equipo",
+    "seconds": 60,
+    "bullets": [
+      "Modelo e implementación integral, con decisiones justificadas",
+      "Reproducibilidad offline comprobada; SQL por verificar",
+      "Completar pruebas, evidencia Azure y aportes reales",
+      "Todos deben defender modelo, consulta, regla y limitación"
+    ],
+    "notes": "Cerrar respondiendo a los objetivos sin afirmar éxito de operaciones no ejecutadas. Citar informe §15 para fuentes oficiales y anexos para trazabilidad. Confirmar líder, miembros activos y próximos pasos reales. No inventar resultados ni contribuciones."
+  }
+]

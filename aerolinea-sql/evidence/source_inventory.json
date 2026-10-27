@@ -1,0 +1,37 @@
+[
+  {
+    "file": "Producto académico colaborativo.txt",
+    "bytes": 5465,
+    "pages": null,
+    "sha256": "822e7b87326df076e1618a955f9b00ea2d6378d710406ed7a680251f69766d85",
+    "reading": "texto íntegro leído; no OCR necesario en secciones citadas"
+  },
+  {
+    "file": "PSMA00611 Silabo.pdf",
+    "bytes": 187091,
+    "pages": 10,
+    "sha256": "33a3f3cc52739c57f36341951e29bc28b3da384ef59e496a87f512800e9043db",
+    "reading": "texto íntegro leído; no OCR necesario en secciones citadas"
+  },
+  {
+    "file": "PSMA00611_Guía de aprendizaje_VIERNES.pdf",
+    "bytes": 670285,
+    "pages": 25,
+    "sha256": "400aaaf3ad62affba402c63cb01759ef5004c1888e3bee2e6e33791dacf42ac7",
+    "reading": "texto íntegro leído; no OCR necesario en secciones citadas"
+  },
+  {
+    "file": "Texto pegado.txt",
+    "bytes": 15584,
+    "pages": null,
+    "sha256": "6f29a0b0fb924131460687e6ed83c39d88a41596c4b48d5b235ff3e53b7f8742",
+    "reading": "texto íntegro leído; no OCR necesario en secciones citadas"
+  },
+  {
+    "file": "PSMA00611 Guia de aprendizaje.pdf",
+    "bytes": 1504869,
+    "pages": 26,
+    "sha256": "90ed9afd41bf8dd4f727fd948719fe5a5d4e208d7746ca78eff9e0e345e9a993",
+    "reading": "texto íntegro leído; no OCR necesario en secciones citadas"
+  }
+]

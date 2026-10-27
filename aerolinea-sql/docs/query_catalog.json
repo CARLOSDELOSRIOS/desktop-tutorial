@@ -1,0 +1,182 @@
+[
+  {
+    "id": "Q01",
+    "title": "Ocupación por vuelo y cabina",
+    "grain": "vuelo × cabina",
+    "filters": "FlightDate en [Start,End); excluye vuelos cancelados",
+    "formula": "100 × plazas reservadas activas / plazas ofrecidas",
+    "interpretation": "Compara ocupación reservada y pagada; no equivale a pasajeros efectivamente transportados.",
+    "sql": "SELECT FlightId,RouteId,FlightDate,CabinCode,Capacity,Reserved,PaidSeats,Available,OccupancyPercent\nFROM air.vOccupancy WHERE FlightDate>=@Start AND FlightDate<@End AND Status<>'CANCELLED' ORDER BY FlightId,CabinCode;",
+    "status": "PENDIENTE: requiere motor SQL Server; no existe resultado observado"
+  },
+  {
+    "id": "Q02",
+    "title": "Ocupación ponderada por ruta y cabina",
+    "grain": "ruta × cabina",
+    "filters": "FlightDate; excluye cancelados",
+    "formula": "100 × SUM(Reserved) / SUM(Capacity)",
+    "interpretation": "Ponderar por capacidad evita promediar porcentajes de vuelos con denominadores distintos.",
+    "sql": "SELECT RouteId,CabinCode,SUM(Capacity) Capacity,SUM(Reserved) Reserved,\nCAST(100.0*SUM(Reserved)/NULLIF(SUM(Capacity),0) AS decimal(6,2)) OccupancyPercent\nFROM air.vOccupancy WHERE FlightDate>=@Start AND FlightDate<@End AND Status<>'CANCELLED'\nGROUP BY RouteId,CabinCode ORDER BY RouteId,CabinCode;",
+    "status": "PENDIENTE: requiere motor SQL Server; no existe resultado observado"
+  },
+  {
+    "id": "Q03",
+    "title": "Ventas comerciales y cobros de la cohorte",
+    "grain": "cohorte de fecha de venta",
+    "filters": "SoldAt en [Start,End); estado actual cargado",
+    "formula": "emitido bruto, neto de cancelación, cobrado y reembolsado se agregan por tiquete",
+    "interpretation": "Ventas netas son contratos vigentes; no son ingreso contable devengado ni utilidad.",
+    "sql": "SELECT COUNT_BIG(*) Tickets,COALESCE(SUM(FinalPrice),0) GrossIssued,COALESCE(SUM(NetSales),0) NetSales,\nCOALESCE(SUM(Collected),0) Collected,COALESCE(SUM(Refunded),0) Refunded,COALESCE(SUM(NetCash),0) NetCash,COALESCE(SUM(Outstanding),0) Outstanding\nFROM air.vTicketFinance WHERE SoldAt>=@Start AND SoldAt<@End;",
+    "status": "PENDIENTE: requiere motor SQL Server; no existe resultado observado"
+  },
+  {
+    "id": "Q04",
+    "title": "Flujo de caja por fecha de movimiento",
+    "grain": "día UTC de pago o reembolso",
+    "filters": "PaidAt y RefundedAt en [Start,End)",
+    "formula": "cobros confirmados − reembolsos",
+    "interpretation": "Los movimientos de caja y las cohortes de venta tienen calendarios distintos.",
+    "sql": "WITH movements AS (\nSELECT CAST(PaidAt AS date) DayUtc,Amount Collected,CAST(0 AS decimal(12,2)) Refunded FROM air.Payment WHERE Status='CONFIRMED' AND PaidAt>=@Start AND PaidAt<@End\nUNION ALL SELECT CAST(RefundedAt AS date),0,Amount FROM air.Refund WHERE RefundedAt>=@Start AND RefundedAt<@End)\nSELECT DayUtc,SUM(Collected) Collected,SUM(Refunded) Refunded,SUM(Collected-Refunded) NetCash FROM movements GROUP BY DayUtc ORDER BY DayUtc;",
+    "status": "PENDIENTE: requiere motor SQL Server; no existe resultado observado"
+  },
+  {
+    "id": "Q05",
+    "title": "Tiquetes con saldo pendiente",
+    "grain": "tiquete",
+    "filters": "SoldAt y Outstanding>0",
+    "formula": "FinalPrice − cobros confirmados, cero si cancelado",
+    "interpretation": "Prioriza cobros pendientes; el saldo es el estado actual, sin reconstrucción histórica al corte.",
+    "sql": "SELECT TicketId,FlightId,Status,FinalPrice,Collected,Outstanding FROM air.vTicketFinance\nWHERE SoldAt>=@Start AND SoldAt<@End AND Outstanding>0 ORDER BY Outstanding DESC,TicketId;",
+    "status": "PENDIENTE: requiere motor SQL Server; no existe resultado observado"
+  },
+  {
+    "id": "Q06",
+    "title": "Conciliación de reembolsos",
+    "grain": "tiquete cancelado",
+    "filters": "SoldAt y estado CANCELLED",
+    "formula": "Collected − Refunded debe ser cero",
+    "interpretation": "Un pago fallido no se devuelve. Un valor distinto de cero es una inconsistencia.",
+    "sql": "SELECT TicketId,Collected,Refunded,NetCash FROM air.vTicketFinance\nWHERE SoldAt>=@Start AND SoldAt<@End AND Status='CANCELLED' ORDER BY TicketId;",
+    "status": "PENDIENTE: requiere motor SQL Server; no existe resultado observado"
+  },
+  {
+    "id": "Q07",
+    "title": "Precio medio y descuento efectivo",
+    "grain": "cabina",
+    "filters": "SoldAt; tiquetes no cancelados",
+    "formula": "AVG(FinalPrice); 100 × SUM(OriginalPrice−FinalPrice)/SUM(OriginalPrice)",
+    "interpretation": "El descuento efectivo se pondera por importe, no por promedio simple de porcentajes.",
+    "sql": "SELECT CabinCode,COUNT(*) Tickets,AVG(OriginalPrice) MeanOriginal,AVG(FinalPrice) MeanFinal,\nCAST(100.0*SUM(OriginalPrice-FinalPrice)/NULLIF(SUM(OriginalPrice),0) AS decimal(6,2)) EffectiveDiscountPercent\nFROM air.Ticket WHERE SoldAt>=@Start AND SoldAt<@End AND Status<>'CANCELLED' GROUP BY CabinCode ORDER BY CabinCode;",
+    "status": "PENDIENTE: requiere motor SQL Server; no existe resultado observado"
+  },
+  {
+    "id": "Q08",
+    "title": "Ventas por canal, incluidos canales sin venta",
+    "grain": "canal",
+    "filters": "SoldAt en condición del LEFT JOIN",
+    "formula": "SUM de importes por tiquete",
+    "interpretation": "Los canales sin actividad aparecen con cero; no se interpreta ausencia de datos como información desconocida.",
+    "sql": "SELECT c.ChannelId,c.Name,c.Kind,COUNT(t.TicketId) Tickets,COALESCE(SUM(t.NetSales),0) NetSales,COALESCE(SUM(t.NetCash),0) NetCash\nFROM air.SalesChannel c LEFT JOIN air.vTicketFinance t ON t.ChannelId=c.ChannelId AND t.SoldAt>=@Start AND t.SoldAt<@End\nGROUP BY c.ChannelId,c.Name,c.Kind ORDER BY c.ChannelId;",
+    "status": "PENDIENTE: requiere motor SQL Server; no existe resultado observado"
+  },
+  {
+    "id": "Q09",
+    "title": "Viajes según inscripción del pasajero al vender",
+    "grain": "inscrito o sin registro al vender",
+    "filters": "SoldAt; tiquetes activos",
+    "formula": "Customer.RegisteredAt <= SoldAt",
+    "interpretation": "Se cuentan tiquetes, no personas únicas; comprador y pasajero son roles distintos.",
+    "sql": "SELECT CASE WHEN c.PersonId IS NOT NULL AND c.RegisteredAt<=t.SoldAt THEN 'REGISTERED' ELSE 'UNREGISTERED' END Registration,\nCOUNT(*) Tickets,COUNT(DISTINCT t.PassengerId) DistinctPassengers FROM air.Ticket t LEFT JOIN air.Customer c ON c.PersonId=t.PassengerId\nWHERE t.SoldAt>=@Start AND t.SoldAt<@End AND t.Status<>'CANCELLED'\nGROUP BY CASE WHEN c.PersonId IS NOT NULL AND c.RegisteredAt<=t.SoldAt THEN 'REGISTERED' ELSE 'UNREGISTERED' END;",
+    "status": "PENDIENTE: requiere motor SQL Server; no existe resultado observado"
+  },
+  {
+    "id": "Q10",
+    "title": "Cancelaciones por ruta",
+    "grain": "ruta",
+    "filters": "SoldAt de la cohorte",
+    "formula": "100 × cancelados / emitidos",
+    "interpretation": "La tasa descriptiva sintetiza las políticas sintéticas; no explica causas del mercado.",
+    "sql": "SELECT s.RouteId,COUNT(*) Issued,SUM(CASE WHEN t.Status='CANCELLED' THEN 1 ELSE 0 END) Cancelled,\nCAST(100.0*SUM(CASE WHEN t.Status='CANCELLED' THEN 1 ELSE 0 END)/COUNT(*) AS decimal(6,2)) CancellationPercent\nFROM air.Ticket t JOIN air.Flight f ON f.FlightId=t.FlightId JOIN air.Schedule s ON s.ScheduleId=f.ScheduleId\nWHERE t.SoldAt>=@Start AND t.SoldAt<@End GROUP BY s.RouteId ORDER BY s.RouteId;",
+    "status": "PENDIENTE: requiere motor SQL Server; no existe resultado observado"
+  },
+  {
+    "id": "Q11",
+    "title": "Utilización programada de flota",
+    "grain": "avión",
+    "filters": "FlightDate; excluye cancelados; incluye aviones ociosos",
+    "formula": "minutos de vuelo programados / (días del intervalo × 1440)",
+    "interpretation": "No incluye mantenimiento ni disponibilidad técnica; no representa utilización real observada.",
+    "sql": "SELECT a.AircraftId,a.Registration,COUNT(f.FlightId) Flights,COALESCE(SUM(DATEDIFF(minute,f.DepartureUtc,f.ArrivalUtc)),0) ScheduledMinutes,\nCAST(100.0*COALESCE(SUM(DATEDIFF(minute,f.DepartureUtc,f.ArrivalUtc)),0)/NULLIF(DATEDIFF(day,@Start,@End)*1440.0,0) AS decimal(7,3)) CalendarUtilizationPercent\nFROM air.Aircraft a LEFT JOIN air.Flight f ON f.AircraftId=a.AircraftId AND f.FlightDate>=@Start AND f.FlightDate<@End AND f.Status<>'CANCELLED'\nGROUP BY a.AircraftId,a.Registration ORDER BY a.AircraftId;",
+    "status": "PENDIENTE: requiere motor SQL Server; no existe resultado observado"
+  },
+  {
+    "id": "Q12",
+    "title": "Distribución temporal de compras",
+    "grain": "día UTC",
+    "filters": "SoldAt",
+    "formula": "número de tiquetes por fecha de compra",
+    "interpretation": "La semilla impone los patrones. Una serie de ventas no es una estimación del mercado.",
+    "sql": "SELECT CAST(SoldAt AS date) SaleDayUtc,COUNT(*) Tickets,SUM(FinalPrice) GrossIssued FROM air.Ticket\nWHERE SoldAt>=@Start AND SoldAt<@End GROUP BY CAST(SoldAt AS date) ORDER BY SaleDayUtc;",
+    "status": "PENDIENTE: requiere motor SQL Server; no existe resultado observado"
+  },
+  {
+    "id": "Q13",
+    "title": "Acumulado de ventas comerciales netas",
+    "grain": "día UTC de compra",
+    "filters": "SoldAt; estado actual",
+    "formula": "SUM diario seguida de SUM OVER ordenado",
+    "interpretation": "Se acumula la cohorte según el estado final cargado; no es un libro mayor histórico diario.",
+    "sql": "WITH daily AS (SELECT CAST(SoldAt AS date) SaleDayUtc,SUM(NetSales) NetSales FROM air.vTicketFinance\nWHERE SoldAt>=@Start AND SoldAt<@End GROUP BY CAST(SoldAt AS date))\nSELECT SaleDayUtc,NetSales,SUM(NetSales) OVER(ORDER BY SaleDayUtc ROWS UNBOUNDED PRECEDING) CumulativeNetSales FROM daily ORDER BY SaleDayUtc;",
+    "status": "PENDIENTE: requiere motor SQL Server; no existe resultado observado"
+  },
+  {
+    "id": "Q14",
+    "title": "Rutas con ocupación reservada superior al 50 %",
+    "grain": "ruta",
+    "filters": "FlightDate; excluye cancelados",
+    "formula": "HAVING SUM(Reserved) > 0.5 × SUM(Capacity)",
+    "interpretation": "El umbral del 50 % es exploratorio, sin significado de rentabilidad.",
+    "sql": "SELECT RouteId,SUM(Reserved) Reserved,SUM(Capacity) Capacity FROM air.vOccupancy\nWHERE FlightDate>=@Start AND FlightDate<@End AND Status<>'CANCELLED' GROUP BY RouteId HAVING SUM(Reserved)>0.5*SUM(Capacity) ORDER BY RouteId;",
+    "status": "PENDIENTE: requiere motor SQL Server; no existe resultado observado"
+  },
+  {
+    "id": "Q15",
+    "title": "Conciliación global de importes sin multiplicación",
+    "grain": "cohorte de tiquetes",
+    "filters": "SoldAt",
+    "formula": "NetSales − NetCash − Outstanding = 0",
+    "interpretation": "Compara la vista con la suma independiente de pagos; dos pagos por tiquete no duplican la venta.",
+    "sql": "SELECT COALESCE(SUM(NetSales-NetCash-Outstanding),0) BalanceDifference,\nCOALESCE(SUM(Collected),0)-(SELECT COALESCE(SUM(p.Amount),0) FROM air.Payment p JOIN air.Ticket t ON t.TicketId=p.TicketId WHERE p.Status='CONFIRMED' AND t.SoldAt>=@Start AND t.SoldAt<@End) CollectedDifference\nFROM air.vTicketFinance WHERE SoldAt>=@Start AND SoldAt<@End;",
+    "status": "PENDIENTE: requiere motor SQL Server; no existe resultado observado"
+  },
+  {
+    "id": "Q16",
+    "title": "Llegadas en un día local posterior",
+    "grain": "vuelo",
+    "filters": "FlightDate; llegada local de fecha mayor que salida local",
+    "formula": "comparar fechas de datetimeoffset en zona de cada aeropuerto",
+    "interpretation": "La duración siempre se calcula en UTC; la fecha local puede cambiar al cruzar husos.",
+    "sql": "SELECT FlightId,OriginCode,DestinationCode,DepartureLocal,ArrivalLocal,DATEDIFF(minute,DepartureUtc,ArrivalUtc) DurationMinutes\nFROM air.vFlightLocal WHERE FlightDate>=@Start AND FlightDate<@End AND CAST(ArrivalLocal AS date)>CAST(DepartureLocal AS date) ORDER BY FlightId;",
+    "status": "PENDIENTE: requiere motor SQL Server; no existe resultado observado"
+  },
+  {
+    "id": "Q17",
+    "title": "Múltiples intentos y pagos por tiquete",
+    "grain": "tiquete con más de un intento",
+    "filters": "SoldAt",
+    "formula": "COUNT de pagos y SUM condicional de confirmados",
+    "interpretation": "La presencia de múltiples intentos no significa cobro duplicado; se diferencian fallidos y confirmados.",
+    "sql": "SELECT t.TicketId,COUNT(p.PaymentId) Attempts,SUM(CASE WHEN p.Status='CONFIRMED' THEN 1 ELSE 0 END) ConfirmedCount,\nSUM(CASE WHEN p.Status='CONFIRMED' THEN p.Amount ELSE 0 END) Collected\nFROM air.Ticket t JOIN air.Payment p ON p.TicketId=t.TicketId WHERE t.SoldAt>=@Start AND t.SoldAt<@End GROUP BY t.TicketId HAVING COUNT(p.PaymentId)>1 ORDER BY t.TicketId;",
+    "status": "PENDIENTE: requiere motor SQL Server; no existe resultado observado"
+  },
+  {
+    "id": "Q18",
+    "title": "Carga programada por tripulante",
+    "grain": "empleado",
+    "filters": "FlightDate; excluye cancelados",
+    "formula": "suma de minutos de vuelos asignados",
+    "interpretation": "La carga no certifica cumplimiento laboral o aeronáutico; se modela solo la no superposición.",
+    "sql": "SELECT e.EmployeeId,p.FullName,e.RoleCode,COUNT(f.FlightId) Flights,COALESCE(SUM(DATEDIFF(minute,f.DepartureUtc,f.ArrivalUtc)),0) ScheduledMinutes\nFROM air.Employee e JOIN air.Person p ON p.PersonId=e.PersonId LEFT JOIN air.CrewAssignment c ON c.EmployeeId=e.EmployeeId\nLEFT JOIN air.Flight f ON f.FlightId=c.FlightId AND f.FlightDate>=@Start AND f.FlightDate<@End AND f.Status<>'CANCELLED'\nGROUP BY e.EmployeeId,p.FullName,e.RoleCode ORDER BY e.EmployeeId;",
+    "status": "PENDIENTE: requiere motor SQL Server; no existe resultado observado"
+  }
+]

@@ -1,0 +1,164 @@
+erDiagram
+    Airport {
+        char AirportCode "char(3); NOT NULL"
+        nvarchar Name "nvarchar(100); NOT NULL"
+        nvarchar City "nvarchar(80); NOT NULL"
+        sysname WindowsTZ "sysname; NOT NULL"
+        varchar IanaTZ "varchar(50); NOT NULL"
+    }
+    Cabin {
+        varchar CabinCode "varchar(3); NOT NULL"
+        nvarchar Name "nvarchar(30); NOT NULL"
+    }
+    Person {
+        int PersonId "int; NOT NULL"
+        nvarchar FullName "nvarchar(120); NOT NULL"
+        varchar Email "varchar(160); NULL"
+        date BirthDate "date; NULL"
+    }
+    Customer {
+        int PersonId "int; NOT NULL"
+        datetime2 RegisteredAt "datetime2(0); NOT NULL"
+    }
+    Employee {
+        int EmployeeId "int; NOT NULL"
+        int PersonId "int; NOT NULL"
+        varchar RoleCode "varchar(10); NOT NULL"
+        bit Active "bit; NOT NULL"
+    }
+    Aircraft {
+        int AircraftId "int; NOT NULL"
+        varchar Registration "varchar(12); NOT NULL"
+        nvarchar Model "nvarchar(60); NOT NULL"
+        bit Active "bit; NOT NULL"
+    }
+    AircraftSeat {
+        int AircraftId "int; NOT NULL"
+        varchar SeatNo "varchar(4); NOT NULL"
+        varchar CabinCode "varchar(3); NOT NULL"
+    }
+    Route {
+        int RouteId "int; NOT NULL"
+        char OriginCode "char(3); NOT NULL"
+        char DestinationCode "char(3); NOT NULL"
+    }
+    Schedule {
+        int ScheduleId "int; NOT NULL"
+        int RouteId "int; NOT NULL"
+        tinyint IsoWeekday "tinyint; NOT NULL"
+        time DepartureLocal "time(0); NOT NULL"
+        smallint DurationMinutes "smallint; NOT NULL"
+        date ValidFrom "date; NOT NULL"
+        date ValidTo "date; NOT NULL"
+    }
+    Flight {
+        int FlightId "int; NOT NULL"
+        int ScheduleId "int; NOT NULL"
+        int AircraftId "int; NOT NULL"
+        date FlightDate "date; NOT NULL"
+        datetime2 DepartureUtc "datetime2(0); NOT NULL"
+        datetime2 ArrivalUtc "datetime2(0); NOT NULL"
+        varchar Status "varchar(10); NOT NULL"
+    }
+    FlightSeat {
+        int FlightId "int; NOT NULL"
+        int AircraftId "int; NOT NULL"
+        varchar SeatNo "varchar(4); NOT NULL"
+        varchar CabinCode "varchar(3); NOT NULL"
+    }
+    CrewAssignment {
+        int FlightId "int; NOT NULL"
+        int EmployeeId "int; NOT NULL"
+    }
+    SalesChannel {
+        int ChannelId "int; NOT NULL"
+        nvarchar Name "nvarchar(80); NOT NULL"
+        varchar Kind "varchar(8); NOT NULL"
+        nvarchar Address "nvarchar(200); NULL"
+        varchar Url "varchar(200); NULL"
+        char AirportCode "char(3); NULL"
+    }
+    Fare {
+        int FareId "int; NOT NULL"
+        int RouteId "int; NOT NULL"
+        varchar CabinCode "varchar(3); NOT NULL"
+        datetime2 ValidFrom "datetime2(0); NOT NULL"
+        datetime2 ValidTo "datetime2(0); NOT NULL"
+        decimal Price "decimal(12,2); NOT NULL"
+    }
+    Discount {
+        int DiscountId "int; NOT NULL"
+        varchar Code "varchar(20); NOT NULL"
+        decimal PercentValue "decimal(5,2); NOT NULL"
+        datetime2 ValidFrom "datetime2(0); NOT NULL"
+        datetime2 ValidTo "datetime2(0); NOT NULL"
+    }
+    Ticket {
+        bigint TicketId "bigint IDENTITY(1,1); NOT NULL"
+        uniqueidentifier RequestKey "uniqueidentifier; NOT NULL"
+        int FlightId "int; NOT NULL"
+        varchar SeatNo "varchar(4); NOT NULL"
+        varchar CabinCode "varchar(3); NOT NULL"
+        int PassengerId "int; NOT NULL"
+        int BuyerId "int; NOT NULL"
+        int ChannelId "int; NOT NULL"
+        int FareId "int; NOT NULL"
+        int DiscountId "int; NULL"
+        decimal OriginalPrice "decimal(12,2); NOT NULL"
+        decimal DiscountPercent "decimal(5,2); NOT NULL"
+        datetime2 SoldAt "datetime2(0); NOT NULL"
+        varchar Status "varchar(10); NOT NULL"
+        datetime2 CancelledAt "datetime2(0); NULL"
+        nvarchar CancelReason "nvarchar(200); NULL"
+        decimal FinalPrice "decimal(12,2) COMPUTED PERSISTED; NULL"
+    }
+    Payment {
+        bigint PaymentId "bigint IDENTITY(1,1); NOT NULL"
+        bigint TicketId "bigint; NOT NULL"
+        uniqueidentifier RequestKey "uniqueidentifier; NOT NULL"
+        decimal Amount "decimal(12,2); NOT NULL"
+        varchar Status "varchar(9); NOT NULL"
+        varchar Method "varchar(10); NOT NULL"
+        datetime2 PaidAt "datetime2(0); NOT NULL"
+    }
+    Refund {
+        bigint RefundId "bigint IDENTITY(1,1); NOT NULL"
+        bigint PaymentId "bigint; NOT NULL"
+        decimal Amount "decimal(12,2); NOT NULL"
+        datetime2 RefundedAt "datetime2(0); NOT NULL"
+    }
+    StatusEvent {
+        bigint EventId "bigint IDENTITY(1,1); NOT NULL"
+        bigint TicketId "bigint; NULL"
+        int FlightId "int; NULL"
+        varchar FromStatus "varchar(10); NULL"
+        varchar ToStatus "varchar(10); NOT NULL"
+        datetime2 ChangedAt "datetime2(0); NOT NULL"
+        sysname Actor "sysname; NOT NULL"
+    }
+    Person ||--o| Customer : "PersonId"
+    Person ||--o| Employee : "PersonId"
+    Aircraft ||--o{ AircraftSeat : "AircraftId"
+    Cabin ||--o{ AircraftSeat : "CabinCode"
+    Airport ||--o{ Route : "OriginCode"
+    Airport ||--o{ Route : "DestinationCode"
+    Route ||--o{ Schedule : "RouteId"
+    Schedule ||--o{ Flight : "ScheduleId"
+    Aircraft ||--o{ Flight : "AircraftId"
+    Flight ||--o{ FlightSeat : "FlightId,AircraftId"
+    AircraftSeat ||--o{ FlightSeat : "AircraftId,SeatNo,CabinCode"
+    Flight ||--o{ CrewAssignment : "FlightId"
+    Employee ||--o{ CrewAssignment : "EmployeeId"
+    Airport o|--o{ SalesChannel : "AirportCode"
+    Route ||--o{ Fare : "RouteId"
+    Cabin ||--o{ Fare : "CabinCode"
+    FlightSeat ||--o{ Ticket : "FlightId,SeatNo,CabinCode"
+    Person ||--o{ Ticket : "PassengerId"
+    Person ||--o{ Ticket : "BuyerId"
+    SalesChannel ||--o{ Ticket : "ChannelId"
+    Fare ||--o{ Ticket : "FareId"
+    Discount o|--o{ Ticket : "DiscountId"
+    Ticket ||--o{ Payment : "TicketId"
+    Payment ||--o| Refund : "PaymentId"
+    Ticket o|--o{ StatusEvent : "TicketId"
+    Flight o|--o{ StatusEvent : "FlightId"

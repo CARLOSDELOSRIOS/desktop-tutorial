@@ -1,0 +1,14 @@
+digraph Architecture {
+ graph [rankdir=TB,bgcolor=white,pad=0.25,nodesep=0.6,ranksep=0.6];
+ node [shape=box,style="rounded,filled",fillcolor="#e8f2f5",color="#147d92",fontname="DejaVu Sans",fontsize=18,margin=0.18];
+ edge [fontname="DejaVu Sans",fontsize=12];
+ SSMS [label="SSMS\nAdministración"];
+ Python [label="Python + pyodbc\nAutomatización"];
+ Local [label="SQL Server local\nWindows / localhost\nPor comprobar"];
+ Azure [label="Azure SQL Database\nFQDN y certificado\nPor desplegar"];
+ Resultados [label="CSV, figuras y evidencia\nSeparados por destino"];
+ {rank=same;SSMS;Python;} {rank=same;Local;Azure;}
+ SSMS->Local;Python->Local [label="ODBC / Windows"];
+ Python->Azure [label="ODBC / Entra o SQL"];
+ Local->Resultados;Azure->Resultados;
+}

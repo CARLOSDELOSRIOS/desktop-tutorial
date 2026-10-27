@@ -1,0 +1,38 @@
+test_all_controlled_sql_has_valid_batch_structure (test_offline.OfflineTests.test_all_controlled_sql_has_valid_batch_structure) ... ok
+test_azure_rejects_untrusted_certificate (test_offline.OfflineTests.test_azure_rejects_untrusted_certificate) ... ok
+test_azure_requires_correct_auth (test_offline.OfflineTests.test_azure_requires_correct_auth) ... ok
+test_coverage_of_required_scenarios (test_offline.OfflineTests.test_coverage_of_required_scenarios) ... ok
+test_dictionary_matches_ddl (test_offline.OfflineTests.test_dictionary_matches_ddl) ... ok
+test_financial_inputs (test_offline.OfflineTests.test_financial_inputs) ... ok
+test_flight_temporal_consistency (test_offline.OfflineTests.test_flight_temporal_consistency) ... ok
+test_generation_bounds (test_offline.OfflineTests.test_generation_bounds) ... ok
+test_go_in_strings_comments_and_identifiers (test_offline.OfflineTests.test_go_in_strings_comments_and_identifiers) ... ok
+test_invalid_batches_rejected (test_offline.OfflineTests.test_invalid_batches_rejected) ... ok
+test_inventory_and_capacity (test_offline.OfflineTests.test_inventory_and_capacity) ... ok
+test_local_connection_encrypted (test_offline.OfflineTests.test_local_connection_encrypted) ... ok
+test_no_driver_invented (test_offline.OfflineTests.test_no_driver_invented) ... ok
+test_no_secrets_committed (test_offline.OfflineTests.test_no_secrets_committed) ... ok
+test_odbc_escaping (test_offline.OfflineTests.test_odbc_escaping) ... ok
+test_parameterized_procedure_client_contract (test_offline.OfflineTests.test_parameterized_procedure_client_contract) ... ERROR
+test_queries_are_catalogued (test_offline.OfflineTests.test_queries_are_catalogued) ... ok
+test_reference_insert_file_never_contains_real_domain (test_offline.OfflineTests.test_reference_insert_file_never_contains_real_domain) ... ok
+test_reproducible_inputs (test_offline.OfflineTests.test_reproducible_inputs) ... ok
+test_split_go_not_sent (test_offline.OfflineTests.test_split_go_not_sent) ... ok
+test_uuid_uniqueness (test_offline.OfflineTests.test_uuid_uniqueness) ... ok
+
+======================================================================
+ERROR: test_parameterized_procedure_client_contract (test_offline.OfflineTests.test_parameterized_procedure_client_contract)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/aerolinea-sql/tests/test_offline.py", line 59, in test_parameterized_procedure_client_contract
+    self.assertEqual(issue(cn,'00000000-0000-0000-0000-000000000001',1,'1A',1,2,1,datetime(2025,1,1)),42)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/work/aerolinea-sql/src/airline/db.py", line 106, in issue
+    return rows(cur)[0]['TicketId']
+           ~~~~~~~~~~~~^^^^^^^^^^^^
+KeyError: 'TicketId'
+
+----------------------------------------------------------------------
+Ran 21 tests in 0.136s
+
+FAILED (errors=1)

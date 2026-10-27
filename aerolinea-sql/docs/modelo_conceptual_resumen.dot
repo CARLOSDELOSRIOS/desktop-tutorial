@@ -1,0 +1,8 @@
+digraph Summary {
+ graph [rankdir=LR,bgcolor=white,pad=0.3,nodesep=0.5,ranksep=0.6];
+ node [shape=box,style="rounded,filled",fillcolor="#e8f2f5",color="#147d92",fontname="DejaVu Sans",fontsize=20,margin=0.18];
+ edge [fontname="DejaVu Sans",fontsize=13,color="#60818e"];
+ Ruta->Programa [label="1:N"];Programa->Vuelo [label="1:N"];
+ Persona->Tiquete [label="compra / viaja"];Tiquete->Pago [label="1:0..N"];
+ Vuelo->Tiquete [label="plaza disponible"];
+}

@@ -1,0 +1,24 @@
+digraph Conceptual {
+ graph [rankdir=LR,bgcolor="white",pad=0.25,nodesep=0.4,ranksep=0.9];
+ node [shape=box,style="rounded,filled",fillcolor="#e8f2f5",color="#147d92",fontname="DejaVu Sans",fontsize=13];
+ edge [fontname="DejaVu Sans",fontsize=10,color="#60818e"];
+ Persona -> Cliente [label="puede registrarse 0..1"];
+ Persona -> Empleado [label="puede trabajar 0..1"];
+ Persona -> Tiquete [label="compra / viaja 0..N"];
+ Aeropuerto -> Ruta [label="origen / destino"];
+ Ruta -> Programa [label="0..N patrones"];
+ Programa -> Vuelo [label="0..N fechas"];
+ Avion -> Vuelo [label="asignado 0..N"];
+ Avion -> Asiento [label="contiene 1..N"];
+ Cabina -> Asiento [label="clasifica"];
+ Vuelo -> Plaza [label="ofrece 1..N"];
+ Asiento -> Plaza [label="configura"];
+ Empleado -> Vuelo [label="tripula N:M"];
+ Plaza -> Tiquete [label="0..1 activo; N histórico"];
+ Ruta -> Tarifa [label="por cabina y vigencia"];
+ Tarifa -> Tiquete [label="precio histórico"];
+ Canal -> Tiquete [label="vende 0..N"];
+ Descuento -> Tiquete [label="opcional 0..1"];
+ Tiquete -> Pago [label="0..N intentos"];
+ Pago -> Reembolso [label="0..1 total"];
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "source": "https://raw.githubusercontent.com/MicrosoftDocs/sql-docs/live/docs/t-sql/language-elements/transactions-transact-sql.md",
+    "status": 200,
+    "title": "title: \"Transactions (Transact-SQL)\"",
+    "publication_date": "no usada; cita s. f."
+  },
+  {
+    "source": "https://raw.githubusercontent.com/MicrosoftDocs/sql-docs/live/docs/t-sql/statements/create-index-transact-sql.md",
+    "status": 200,
+    "title": "title: \"CREATE INDEX (Transact-SQL)\"",
+    "publication_date": "no usada; cita s. f."
+  },
+  {
+    "source": "https://raw.githubusercontent.com/MicrosoftDocs/sql-docs/live/docs/relational-databases/system-stored-procedures/sp-getapplock-transact-sql.md",
+    "status": 200,
+    "title": "title: \"sys.sp_getapplock (Transact-SQL)\"",
+    "publication_date": "no usada; cita s. f."
+  },
+  {
+    "source": "https://raw.githubusercontent.com/MicrosoftDocs/sql-docs/live/docs/t-sql/queries/at-time-zone-transact-sql.md",
+    "status": 200,
+    "title": "title: AT TIME ZONE (Transact-SQL)",
+    "publication_date": "no usada; cita s. f."
+  },
+  {
+    "source": "https://raw.githubusercontent.com/MicrosoftDocs/sql-docs/live/docs/connect/odbc/dsn-connection-string-attribute.md",
+    "status": 200,
+    "title": "title: ODBC DSN and Connection String Keywords",
+    "publication_date": "no usada; cita s. f."
+  }
+]
